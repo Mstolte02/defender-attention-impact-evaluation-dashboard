@@ -17,10 +17,10 @@ st.set_page_config(
 # --------------------------------------------------
 # DATA LOAD (YOUR EXACT PATHS)
 # --------------------------------------------------
-df = pd.read_csv("/Users/markstolte/Downloads/Big Data Bowl Submission/defender_attention_all.csv")
+df = pd.read_csv("defender_attention_all.csv")
 nfl_players = nfl.import_players()
 nfl_teams = nfl.import_team_desc()
-df_detailed_results = pd.read_csv("/Users/markstolte/Downloads/Big Data Bowl Submission/intervention_detailed_results.csv")
+df_detailed_results = pd.read_csv("intervention_detailed_results.csv")
 
 # --------------------------------------------------
 # CORE TRANSFORM FUNCTION (UNCHANGED)
@@ -146,13 +146,272 @@ df_view["rank"] = range(1, len(df_view) + 1)
 
 st.caption(f"Showing {len(df_view)} players")
 
-# --------------------------------------------------
-# ORIGINAL CSS (UNCHANGED)
-# --------------------------------------------------
-css_styles = """<style>
-<YOUR FULL ORIGINAL CSS HERE — UNCHANGED>
-</style>
-"""
+# ===== CSS Styles =====
+css_styles = """
+    <style>
+        .attention-table-container {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1a1a2e 100%);
+            padding: 20px;
+            border-radius: 12px;
+            color: #fff;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            margin-top: 20px;
+        }
+        
+        .table-header {
+            text-align: center;
+            margin-bottom: 25px;
+            padding: 20px;
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.15) 0%, rgba(6, 182, 212, 0.15) 100%);
+            border-radius: 10px;
+            border: 1px solid rgba(59, 130, 246, 0.3);
+        }
+        
+        .header-icon {
+            font-size: 36px;
+            margin-bottom: 10px;
+        }
+        
+        .header-text h1 {
+            margin: 0;
+            font-size: 28px;
+            font-weight: bold;
+            color: #fff;
+            line-height: 1.3;
+            background: linear-gradient(135deg, #3b82f6 0%, #06b6d4 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .header-text p {
+            margin: 8px 0 0 0;
+            color: #9ca3af;
+            font-size: 13px;
+            font-weight: 500;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: rgba(30, 30, 50, 0.5);
+            backdrop-filter: blur(10px);
+            border: 1px solid #374151;
+            border-radius: 8px;
+            overflow: visible;
+            margin-top: 20px;
+        }
+        
+        thead {
+            background: linear-gradient(90deg, rgba(55, 65, 81, 0.8) 0%, rgba(55, 65, 81, 0.4) 100%);
+            border-bottom: 2px solid #4b5563;
+        }
+        
+        th {
+            padding: 12px 8px;
+            text-align: center;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #9ca3af;
+        }
+        
+        td {
+            padding: 10px 8px;
+            border-bottom: 1px solid #2d3748;
+            vertical-align: middle;
+            text-align: center;
+        }
+        
+        tbody tr {
+            transition: all 0.2s ease;
+        }
+        
+        tbody tr:hover {
+            background: rgba(59, 130, 246, 0.1);
+        }
+        
+        tbody tr:last-child td {
+            border-bottom: none;
+        }
+        
+        .rank-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 32px;
+            height: 32px;
+            border-radius: 6px;
+            background: #374151;
+            font-weight: bold;
+            font-size: 14px;
+            position: relative;
+        }
+        
+        .rank-badge.gold {
+            background: #fbbf24;
+            color: #78350f;
+        }
+        
+        .rank-badge.silver {
+            background: #d1d5db;
+            color: #374151;
+        }
+        
+        .rank-badge.bronze {
+            background: #d97706;
+            color: #fff;
+        }
+        
+        .medal {
+            position: absolute;
+            top: -6px;
+            right: -6px;
+            font-size: 14px;
+        }
+        
+        .player-cell {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            text-align: center;
+        }
+        
+        .player-headshot {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid;
+            flex-shrink: 0;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+            position: relative;
+        }
+        
+        .team-dot {
+            position: absolute;
+            bottom: -2px;
+            right: -2px;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            border: 2px solid #1f2937;
+        }
+        
+        .player-info h3 {
+            margin: 0;
+            font-size: 11px;
+            font-weight: 600;
+            color: #fff;
+            white-space: nowrap;
+        }
+        
+        .player-info p {
+            margin: 2px 0 0 0;
+            font-size: 9px;
+            color: #9ca3af;
+            white-space: nowrap;
+        }
+        
+        .position-badge {
+            display: inline-block;
+            background: #374151;
+            color: #e5e7eb;
+            padding: 2px 4px;
+            border-radius: 3px;
+            font-size: 8px;
+            font-weight: 600;
+            margin-right: 3px;
+        }
+        
+        .team-badge {
+            display: inline-block;
+            color: #fff;
+            padding: 2px 4px;
+            border-radius: 3px;
+            font-size: 8px;
+            font-weight: 600;
+        }
+        
+        .metric-label {
+            font-size: 8px;
+            color: #9ca3af;
+            text-transform: uppercase;
+            letter-spacing: 0.2px;
+            margin-bottom: 2px;
+        }
+        
+        .metric-value {
+            font-size: 12px;
+            font-weight: 700;
+            color: #fff;
+        }
+        
+        .attention-bar {
+            width: 100%;
+            height: 4px;
+            background: #374151;
+            border-radius: 2px;
+            margin-top: 4px;
+            overflow: hidden;
+        }
+        
+        .attention-fill {
+            height: 100%;
+            border-radius: 2px;
+            transition: width 0.3s ease;
+        }
+        
+        .intervention-header {
+            cursor: help;
+            position: relative;
+        }
+        
+        .legend-container {
+            margin-top: 20px;
+            padding: 15px;
+            background: rgba(30, 30, 50, 0.5);
+            border: 1px solid #374151;
+            border-radius: 8px;
+        }
+        
+        .legend-title {
+            font-size: 12px;
+            font-weight: 600;
+            color: #e5e7eb;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 10px;
+        }
+        
+        .legend-item {
+            margin-bottom: 8px;
+            font-size: 10px;
+            color: #d1d5db;
+            line-height: 1.4;
+        }
+        
+        .legend-item-title {
+            font-weight: 600;
+            color: #e5e7eb;
+        }
+        
+        .legend-item-desc {
+            color: #9ca3af;
+            margin-top: 2px;
+        }
+        
+        .no-results {
+            padding: 40px;
+            text-align: center;
+            color: #9ca3af;
+            font-size: 14px;
+        }
+    </style>
+    """
 
 # --------------------------------------------------
 # ORIGINAL HTML TABLE FUNCTION (UNCHANGED)
