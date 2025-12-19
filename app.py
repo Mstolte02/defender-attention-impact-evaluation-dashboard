@@ -17,16 +17,20 @@ st.set_page_config(
 # --------------------------------------------------
 # DATA LOAD (relative paths)
 # --------------------------------------------------
-df = pd.read_csv("defender_attention_all.csv")
-nfl_players = nfl.import_players()
-nfl_teams = nfl.import_team_desc()
-df_detailed_results = pd.read_csv("intervention_detailed_results.csv")
+@st.cache_data
+def load_data():
+    """Load all required data with caching"""
+    df = pd.read_csv("defender_attention_all.csv")
+    nfl_players = nfl.import_players()
+    nfl_teams = nfl.import_team_desc()
+    df_detailed_results = pd.read_csv("intervention_detailed_results.csv")
+    return df, nfl_players, nfl_teams, df_detailed_results
 
-import pandas as pd
-import numpy as np
-import streamlit as st
-import warnings
-warnings.filterwarnings('ignore')
+df, nfl_players, nfl_teams, df_detailed_results = load_data()
+
+# --------------------------------------------------
+# FUNCTION DEFINITION
+# --------------------------------------------------
 
 def create_player_attention_table(df, nfl_players, nfl_teams, df_detailed_results=None):
     """
@@ -93,29 +97,27 @@ def create_player_attention_table(df, nfl_players, nfl_teams, df_detailed_result
     
     df_with_players['position_group'] = df_with_players['position'].apply(get_position_group)
     
-    
     # Add intervention type counts if df_detailed_results is provided
     if df_detailed_results is not None and len(df_detailed_results) > 0:
-        df_detailed_results = df_detailed_results[df_detailed_results['intervention_type'] == 'REMOVAL']
-        df_detailed_results['defender_nfl_id'] = df_detailed_results['defender_nfl_id'].astype(str)
+        df_detailed_results_copy = df_detailed_results[df_detailed_results['intervention_type'] == 'REMOVAL'].copy()
+        df_detailed_results_copy['defender_nfl_id'] = df_detailed_results_copy['defender_nfl_id'].astype(str)
         
         # Count interventions by type for each player and calculate average impact score
-        removal_stats = df_detailed_results.groupby('defender_nfl_id').agg(
+        removal_stats = df_detailed_results_copy.groupby('defender_nfl_id').agg(
             intervention_removal=('defender_nfl_id', 'size'),
             impact_removal=('impact_score', 'mean')).reset_index()
         
         df_with_players = df_with_players.merge(
             removal_stats, 
-            left_on = 'nfl_id', 
-            right_on = 'defender_nfl_id', 
-            how = 'left')
+            left_on='nfl_id', 
+            right_on='defender_nfl_id', 
+            how='left')
         
         df_with_players['intervention_removal'] = df_with_players['intervention_removal'].fillna(0).astype(int)
         df_with_players['impact_removal'] = df_with_players['impact_removal'].fillna(0)
-                
         
         # Get total intervention count
-        total_interventions = df_detailed_results.groupby('defender_nfl_id').size().reset_index(name='total_interventions')
+        total_interventions = df_detailed_results_copy.groupby('defender_nfl_id').size().reset_index(name='total_interventions')
         df_with_players = df_with_players.merge(
             total_interventions,
             left_on='nfl_id',
@@ -297,56 +299,48 @@ def create_player_attention_table(df, nfl_players, nfl_teams, df_detailed_result
     
     # ===== Legend Section =====
     st.markdown("---")
+    st.markdown("### 📋 Intervention Type Definitions")
     
     col1, col2, col3, col4 = st.columns(4)
     
     with col1:
         st.markdown("""
         **REMOVAL**  
-        *Removes defender from all frames*  
-        What would happen if this defender wasn't on the field at all?
+        Removes defender from all frames  
+        
+        *What would happen if this defender wasn't on the field at all?*
         """)
     
     with col2:
         st.markdown("""
         **FREEZE**  
-        *Freezes defender at initial position*  
-        What if this defender didn't react or pursue at all?
+        Freezes defender at initial position  
+        
+        *What if this defender didn't react or pursue at all?*
         """)
     
     with col3:
         st.markdown("""
         **SLOWDOWN**  
-        *Reduces speed by 50%*  
-        What if this defender was slower/less athletic?
+        Reduces speed by 50%  
+        
+        *What if this defender was slower/less athletic?*
         """)
     
     with col4:
         st.markdown("""
         **MISDIRECTION**  
-        *Rotates velocity by 90 degrees*  
-        What if this defender took a bad angle or was fooled?
+        Rotates velocity by 90 degrees  
+        
+        *What if this defender took a bad angle or was fooled?*
         """)
     
     return filtered_df
 
 
-# ===== USAGE EXAMPLE =====
-# Create a Streamlit app file (app.py):
-#
-# import streamlit as st
-# import pandas as pd
-# from player_attention_streamlit import create_player_attention_table
-#
-# st.set_page_config(page_title="Player Attention Analysis", layout="wide")
-#
-# # Load your data
-# df = pd.read_csv('player_attention.csv')
-# nfl_players = pd.read_csv('nfl_players.csv')
-# nfl_teams = pd.read_csv('nfl_teams.csv')
-# df_detailed_results = pd.read_csv('detailed_results.csv')
-#
-# # Create the table
-# create_player_attention_table(df, nfl_players, nfl_teams, df_detailed_results)
-#
-# # Run with: streamlit run app.py
+# --------------------------------------------------
+# MAIN APP
+# --------------------------------------------------
+
+# Call the function to render the table
+create_player_attention_table(df, nfl_players, nfl_teams, df_detailed_results)
