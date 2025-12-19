@@ -1,6 +1,7 @@
 import pandas as pd
 import numpy as np
 import streamlit as st
+import streamlit.components.v1 as components
 import warnings
 warnings.filterwarnings('ignore')
 
@@ -551,8 +552,13 @@ def create_player_attention_table(df, nfl_players, nfl_teams, df_detailed_result
         """
         return html_content
     
-    # Display the table
-    st.markdown(create_table_html(filtered_df), unsafe_allow_html=True)
+    # Display the table using components.html for proper rendering
+    html_content = create_table_html(filtered_df)
+    
+    # Calculate height based on number of rows (roughly 60px per row + 400px for header/footer)
+    table_height = min(800, max(400, len(filtered_df) * 60 + 400))
+    
+    components.html(html_content, height=table_height, scrolling=True)
 
 
 # ===== USAGE EXAMPLE FOR STREAMLIT APP =====
