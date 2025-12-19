@@ -36,8 +36,8 @@ def load_data():
     """
     # Example - replace with your actual file paths or data loading
     df = pd.read_csv('defender_attention_all.csv')
-    nfl_players = pd.read_csv('nfl_players.csv')
-    nfl_teams = pd.read_csv('nfl_teams.csv')
+    nfl_players = nfl.import_players()
+    nfl_teams = nfl.import_team_desc()
     df_detailed_results = pd.read_csv('intervention_detailed_results.csv')
     
     return df, nfl_players, nfl_teams, df_detailed_results
