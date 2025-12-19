@@ -35,10 +35,10 @@ def load_data():
     You should replace this with your actual data loading logic
     """
     # Example - replace with your actual file paths or data loading
-    df = pd.read_csv('player_attention_metrics.csv')
+    df = pd.read_csv('defender_attention_all.csv')
     nfl_players = pd.read_csv('nfl_players.csv')
     nfl_teams = pd.read_csv('nfl_teams.csv')
-    df_detailed_results = pd.read_csv('detailed_results.csv')
+    df_detailed_results = pd.read_csv('intervention_detailed_results.csv')
     
     return df, nfl_players, nfl_teams, df_detailed_results
 
