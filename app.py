@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 from player_attention_table_streamlit import create_player_attention_table
+import nfl_data_py as nfl
 
 # Set page config - MUST be the first Streamlit command
 st.set_page_config(
