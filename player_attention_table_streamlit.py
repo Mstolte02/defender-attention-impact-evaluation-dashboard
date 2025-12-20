@@ -357,164 +357,87 @@ def create_player_attention_table(df, nfl_players, nfl_teams, df_detailed_result
             font-size: 14px;
         }
         
-        /* ===== MOBILE RESPONSIVE STYLES ===== */
-        @media screen and (max-width: 768px) {
-            .attention-table-container {
-                padding: 10px;
-                margin-top: 10px;
-            }
-            
-            .table-header {
-                padding: 15px;
-                margin-bottom: 20px;
-            }
-            
-            .header-icon {
-                font-size: 32px;
-                margin-bottom: 10px;
-            }
-            
-            .header-text h1 {
-                font-size: 20px;
-                margin-bottom: 15px;
-                line-height: 1.2;
-            }
-            
-            .metric-description {
-                font-size: 11px;
-                line-height: 1.6;
-                padding: 10px 12px;
-            }
-            
-            .metric-description p {
-                margin: 6px 0;
-            }
-            
-            /* Make table scrollable horizontally on mobile */
-            table {
-                display: block;
-                overflow-x: auto;
-                -webkit-overflow-scrolling: touch;
-                white-space: nowrap;
-            }
-            
-            thead, tbody, tr {
-                display: table;
-                width: 100%;
-                table-layout: fixed;
-            }
-            
-            th {
-                padding: 10px 4px;
-                font-size: 9px;
-                letter-spacing: 0.3px;
-            }
-            
-            td {
-                padding: 8px 4px;
-            }
-            
-            .rank-badge {
-                width: 28px;
-                height: 28px;
-                font-size: 12px;
-            }
-            
-            .medal {
-                font-size: 12px;
-                top: -5px;
-                right: -5px;
-            }
-            
-            .player-cell {
-                gap: 6px;
-            }
-            
-            .player-headshot {
-                width: 32px;
-                height: 32px;
-            }
-            
-            .team-dot {
-                width: 10px;
-                height: 10px;
-            }
-            
-            .player-info h3 {
-                font-size: 11px;
-            }
-            
-            .player-info p {
-                font-size: 8px;
-                margin: 2px 0 0 0;
-            }
-            
-            .position-badge,
-            .team-badge {
-                padding: 2px 4px;
-                font-size: 7px;
-            }
-            
-            .metric-label {
-                font-size: 8px;
-                margin-bottom: 2px;
-            }
-            
-            .metric-value {
-                font-size: 11px;
-            }
-            
-            .attention-bar {
-                height: 4px;
-                margin-top: 3px;
-            }
+        /* Player detail modal/tooltip */
+        .player-detail-popup {
+            display: none;
+            position: absolute;
+            background: rgba(15, 23, 42, 0.98);
+            border: 2px solid #3b82f6;
+            border-radius: 12px;
+            padding: 20px;
+            z-index: 1000;
+            max-width: 350px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(10px);
         }
         
-        /* Extra small phones */
-        @media screen and (max-width: 480px) {
-            .header-text h1 {
-                font-size: 16px;
-            }
-            
-            .metric-description {
-                font-size: 10px;
-                padding: 8px 10px;
-            }
-            
-            th {
-                padding: 8px 2px;
-                font-size: 8px;
-            }
-            
-            td {
-                padding: 6px 2px;
-            }
-            
-            .rank-badge {
-                width: 24px;
-                height: 24px;
-                font-size: 10px;
-            }
-            
-            .player-headshot {
-                width: 28px;
-                height: 28px;
-            }
-            
-            .player-info h3 {
-                font-size: 10px;
-            }
-            
-            .metric-value {
-                font-size: 10px;
-            }
+        .player-detail-popup.active {
+            display: block;
+        }
+        
+        .popup-header {
+            font-size: 18px;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 15px;
+            border-bottom: 2px solid #3b82f6;
+            padding-bottom: 10px;
+        }
+        
+        .popup-category {
+            margin: 12px 0;
+            padding: 12px;
+            background: rgba(59, 130, 246, 0.1);
+            border-radius: 8px;
+            border-left: 3px solid;
+        }
+        
+        .popup-category-title {
+            font-size: 14px;
+            font-weight: 700;
+            margin-bottom: 6px;
+        }
+        
+        .popup-category-desc {
+            font-size: 12px;
+            color: #d1d5db;
+            line-height: 1.5;
+        }
+        
+        .player-name-clickable {
+            cursor: pointer;
+            transition: color 0.2s ease;
+        }
+        
+        .player-name-clickable:hover {
+            color: #60a5fa;
+            text-decoration: underline;
         }
     </style>
     """
     
     # ===== Streamlit UI Components =====
     
-    # Create three columns for filters
+    # Create search and filter row
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        search_query = st.text_input(
+            '🔍 Search Player',
+            placeholder='Type player name...',
+            key='player_search'
+        )
+    
+    with col2:
+        # Get unique teams from the data
+        all_teams = sorted(df_with_players['latest_team'].dropna().unique().tolist())
+        team_filter = st.selectbox(
+            'Team',
+            options=['All Teams'] + all_teams,
+            index=0
+        )
+    
+    # Create three columns for other filters
     col1, col2, col3 = st.columns(3)
     
     with col1:
@@ -572,6 +495,16 @@ def create_player_attention_table(df, nfl_players, nfl_teams, df_detailed_result
     # Apply filters
     filtered_df = df_with_players.copy()
     
+    # Search filter
+    if search_query:
+        filtered_df = filtered_df[
+            filtered_df['display_name'].str.contains(search_query, case=False, na=False)
+        ]
+    
+    # Team filter
+    if team_filter != 'All Teams':
+        filtered_df = filtered_df[filtered_df['latest_team'] == team_filter]
+    
     # Position filter
     selected_position = position_map[position_filter]
     if selected_position != 'all':
@@ -595,11 +528,72 @@ def create_player_attention_table(df, nfl_players, nfl_teams, df_detailed_result
     filtered_df = filtered_df.copy()
     filtered_df['rank'] = range(1, len(filtered_df) + 1)
     
-    # Display results count
-    st.info(f"Showing {len(filtered_df)} of {len(df_with_players)} players | Sorted by {sort_option}")
+    # ===== PAGINATION =====
+    # Set items per page
+    items_per_page = 50
+    total_items = len(filtered_df)
+    total_pages = max(1, (total_items + items_per_page - 1) // items_per_page)
+    
+    # Page selector
+    if total_items > items_per_page:
+        page_number = st.selectbox(
+            f'Page (showing {items_per_page} players per page)',
+            options=list(range(1, total_pages + 1)),
+            index=0,
+            key='page_selector'
+        )
+    else:
+        page_number = 1
+    
+    # Calculate pagination indices
+    start_idx = (page_number - 1) * items_per_page
+    end_idx = min(start_idx + items_per_page, total_items)
+    
+    # Get paginated data
+    paginated_df = filtered_df.iloc[start_idx:end_idx].copy()
+    
+    # Display results count with pagination info
+    if total_items > items_per_page:
+        st.info(f"Showing {start_idx + 1}-{end_idx} of {total_items} players (Page {page_number} of {total_pages}) | Sorted by {sort_option}")
+    else:
+        st.info(f"Showing {total_items} of {len(df_with_players)} players | Sorted by {sort_option}")
     
     # ===== Create HTML Table =====
-    def create_table_html(filtered_df):
+    def get_player_category(avg_attention, impact_removal, df_data):
+        """Determine player category based on attention and impact percentiles"""
+        # Calculate percentiles from the full dataset
+        attention_median = df_data['avg_attention'].median()
+        impact_median = df_data['impact_removal'].median()
+        
+        high_attention = avg_attention >= attention_median
+        high_impact = impact_removal >= impact_median
+        
+        if high_attention and high_impact:
+            return {
+                'title': 'High Attention · High Impact',
+                'desc': 'Consistently involved and directly influenced the pass outcome.',
+                'color': '#10b981'
+            }
+        elif not high_attention and high_impact:
+            return {
+                'title': 'Low Attention · High Impact',
+                'desc': 'Not frequently involved, but made a decisive impact when it mattered.',
+                'color': '#f59e0b'
+            }
+        elif high_attention and not high_impact:
+            return {
+                'title': 'High Attention · Low Impact',
+                'desc': 'Often involved, but did not materially affect the result.',
+                'color': '#6366f1'
+            }
+        else:
+            return {
+                'title': 'Low Attention · Low Impact',
+                'desc': 'Rarely factored into the play and had minimal effect on the outcome.',
+                'color': '#6b7280'
+            }
+    
+    def create_table_html(filtered_df, full_df):
         """Create HTML table for the filtered dataframe with bars for all metrics"""
         if len(filtered_df) == 0:
             return f"""
@@ -677,6 +671,12 @@ def create_player_attention_table(df, nfl_players, nfl_teams, df_detailed_result
                 initials = ''.join([w[0].upper() for w in player_name.split() if w])[:2] or '??'
                 headshot_html = f'<div class="player-headshot" style="border-color: {team_color}; background: linear-gradient(135deg, {team_color}, {team_color2}); display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 16px; color: #fff;">{initials}</div>'
 
+            # Get player category
+            category = get_player_category(row.get('avg_attention', 0), row.get('impact_removal', 0), full_df)
+            
+            # Create unique ID for popup
+            popup_id = f"popup-{idx}"
+            
             html_content += f"""
                 <tr>
                     <td>
@@ -684,19 +684,28 @@ def create_player_attention_table(df, nfl_players, nfl_teams, df_detailed_result
                             {rank}{f'<span class="medal">{medal_emoji}</span>' if medal_emoji else ''}
                         </div>
                     </td>
-                    <td>
+                    <td style="position: relative;">
                         <div class="player-cell">
                             <div style="position: relative;">
                                 {headshot_html}
                                 <div class="team-dot" style="background-color: {team_color2};"></div>
                             </div>
                             <div class="player-info">
-                                <h3>{player_name}</h3>
+                                <h3 class="player-name-clickable" onclick="togglePopup('{popup_id}')" title="Click for player insights">{player_name}</h3>
                                 <p>
                                     <span class="position-badge">{position}</span>
                                     <span class="team-badge" style="background-color: {team_color};">{team}</span>
                                     <span style="color: #6b7280; font-size: 11px;">{play_count} plays</span>
                                 </p>
+                            </div>
+                        </div>
+                        
+                        <!-- Player detail popup -->
+                        <div id="{popup_id}" class="player-detail-popup">
+                            <div class="popup-header">{player_name}</div>
+                            <div class="popup-category" style="border-left-color: {category['color']};">
+                                <div class="popup-category-title" style="color: {category['color']};">{category['title']}</div>
+                                <div class="popup-category-desc">{category['desc']}</div>
                             </div>
                         </div>
                     </td>
@@ -719,13 +728,10 @@ def create_player_attention_table(df, nfl_players, nfl_teams, df_detailed_result
                         </div>
                     </td>
 
-                    <!-- Impact Removal with bar -->
+                    <!-- Impact Removal - value only, no bar -->
                     <td>
                         <div class="metric-label">Impact</div>
                         <div class="metric-value">{avg_impact:.1f}%</div>
-                        <div class="attention-bar">
-                            <div class="attention-fill" style="width: {impact_width:.1f}%; background: linear-gradient(90deg, {team_color}, {team_color2});"></div>
-                        </div>
                     </td>
                 </tr>
             """
@@ -734,14 +740,42 @@ def create_player_attention_table(df, nfl_players, nfl_teams, df_detailed_result
                 </tbody>
             </table>
         </div>
+        
+        <script>
+        function togglePopup(popupId) {
+            // Close all other popups first
+            const allPopups = document.querySelectorAll('.player-detail-popup');
+            allPopups.forEach(popup => {
+                if (popup.id !== popupId) {
+                    popup.classList.remove('active');
+                }
+            });
+            
+            // Toggle the clicked popup
+            const popup = document.getElementById(popupId);
+            if (popup) {
+                popup.classList.toggle('active');
+            }
+        }
+        
+        // Close popups when clicking outside
+        document.addEventListener('click', function(event) {
+            if (!event.target.closest('.player-name-clickable') && !event.target.closest('.player-detail-popup')) {
+                const allPopups = document.querySelectorAll('.player-detail-popup');
+                allPopups.forEach(popup => {
+                    popup.classList.remove('active');
+                });
+            }
+        });
+        </script>
         """
         return html_content
     
     # Display the table using components.html for proper rendering
-    html_content = create_table_html(filtered_df)
+    html_content = create_table_html(paginated_df, df_with_players)
     
-    # Calculate height based on number of rows (roughly 60px per row + 400px for header/footer)
-    table_height = min(800, max(400, len(filtered_df) * 60 + 400))
+    # Calculate height based on number of rows (roughly 80px per row + 500px for header/footer)
+    table_height = min(3000, max(600, len(paginated_df) * 80 + 500))
     
     # Add cache-busting parameter to force reload
     import random
