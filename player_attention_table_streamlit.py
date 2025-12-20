@@ -5,6 +5,8 @@ import streamlit.components.v1 as components
 import warnings
 warnings.filterwarnings('ignore')
 
+# Version 2.0 - Updated styling with Oswald font and larger elements
+
 def create_player_attention_table(df, nfl_players, nfl_teams, df_detailed_results=None):
     """
     Create an interactive player attention table with Streamlit
@@ -354,6 +356,159 @@ def create_player_attention_table(df, nfl_players, nfl_teams, df_detailed_result
             color: #9ca3af;
             font-size: 14px;
         }
+        
+        /* ===== MOBILE RESPONSIVE STYLES ===== */
+        @media screen and (max-width: 768px) {
+            .attention-table-container {
+                padding: 10px;
+                margin-top: 10px;
+            }
+            
+            .table-header {
+                padding: 15px;
+                margin-bottom: 20px;
+            }
+            
+            .header-icon {
+                font-size: 32px;
+                margin-bottom: 10px;
+            }
+            
+            .header-text h1 {
+                font-size: 20px;
+                margin-bottom: 15px;
+                line-height: 1.2;
+            }
+            
+            .metric-description {
+                font-size: 11px;
+                line-height: 1.6;
+                padding: 10px 12px;
+            }
+            
+            .metric-description p {
+                margin: 6px 0;
+            }
+            
+            /* Make table scrollable horizontally on mobile */
+            table {
+                display: block;
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+                white-space: nowrap;
+            }
+            
+            thead, tbody, tr {
+                display: table;
+                width: 100%;
+                table-layout: fixed;
+            }
+            
+            th {
+                padding: 10px 4px;
+                font-size: 9px;
+                letter-spacing: 0.3px;
+            }
+            
+            td {
+                padding: 8px 4px;
+            }
+            
+            .rank-badge {
+                width: 28px;
+                height: 28px;
+                font-size: 12px;
+            }
+            
+            .medal {
+                font-size: 12px;
+                top: -5px;
+                right: -5px;
+            }
+            
+            .player-cell {
+                gap: 6px;
+            }
+            
+            .player-headshot {
+                width: 32px;
+                height: 32px;
+            }
+            
+            .team-dot {
+                width: 10px;
+                height: 10px;
+            }
+            
+            .player-info h3 {
+                font-size: 11px;
+            }
+            
+            .player-info p {
+                font-size: 8px;
+                margin: 2px 0 0 0;
+            }
+            
+            .position-badge,
+            .team-badge {
+                padding: 2px 4px;
+                font-size: 7px;
+            }
+            
+            .metric-label {
+                font-size: 8px;
+                margin-bottom: 2px;
+            }
+            
+            .metric-value {
+                font-size: 11px;
+            }
+            
+            .attention-bar {
+                height: 4px;
+                margin-top: 3px;
+            }
+        }
+        
+        /* Extra small phones */
+        @media screen and (max-width: 480px) {
+            .header-text h1 {
+                font-size: 16px;
+            }
+            
+            .metric-description {
+                font-size: 10px;
+                padding: 8px 10px;
+            }
+            
+            th {
+                padding: 8px 2px;
+                font-size: 8px;
+            }
+            
+            td {
+                padding: 6px 2px;
+            }
+            
+            .rank-badge {
+                width: 24px;
+                height: 24px;
+                font-size: 10px;
+            }
+            
+            .player-headshot {
+                width: 28px;
+                height: 28px;
+            }
+            
+            .player-info h3 {
+                font-size: 10px;
+            }
+            
+            .metric-value {
+                font-size: 10px;
+            }
+        }
     </style>
     """
     
@@ -588,7 +743,15 @@ def create_player_attention_table(df, nfl_players, nfl_teams, df_detailed_result
     # Calculate height based on number of rows (roughly 60px per row + 400px for header/footer)
     table_height = min(800, max(400, len(filtered_df) * 60 + 400))
     
-    components.html(html_content, height=table_height, scrolling=True)
+    # Add cache-busting parameter to force reload
+    import random
+    cache_bust = random.randint(1, 1000000)
+    html_with_cache_bust = f"""
+    <!-- Cache bust: {cache_bust} -->
+    {html_content}
+    """
+    
+    components.html(html_with_cache_bust, height=table_height, scrolling=True)
 
 
 # ===== USAGE EXAMPLE FOR STREAMLIT APP =====
