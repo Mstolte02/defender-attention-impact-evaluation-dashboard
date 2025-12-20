@@ -61,5 +61,3 @@ st.markdown("""
         NFL Player Attention Analysis | Data from 2023 Season
     </div>
 """, unsafe_allow_html=True)
-
-
