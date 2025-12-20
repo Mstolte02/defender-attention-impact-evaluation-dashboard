@@ -23,9 +23,6 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# Main title
-st.title("🏈 NFL Player Attention Analysis Dashboard")
-st.markdown("---")
 
 # Load your data
 # Replace these with your actual data loading methods
@@ -64,3 +61,5 @@ st.markdown("""
         NFL Player Attention Analysis | Data from 2023 Season
     </div>
 """, unsafe_allow_html=True)
+
+
