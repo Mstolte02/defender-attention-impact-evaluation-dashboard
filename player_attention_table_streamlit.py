@@ -106,6 +106,8 @@ def create_player_attention_table(df, nfl_players, nfl_teams, df_detailed_result
     # ===== CSS Styles =====
     css_styles = """
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&display=swap');
+        
         .attention-table-container {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
             background: linear-gradient(135deg, #0f172a 0%, #1a1a2e 100%);
@@ -118,34 +120,58 @@ def create_player_attention_table(df, nfl_players, nfl_teams, df_detailed_result
         
         .table-header {
             text-align: center;
-            margin-bottom: 25px;
-            padding: 20px;
+            margin-bottom: 30px;
+            padding: 25px;
             background: linear-gradient(135deg, rgba(59, 130, 246, 0.15) 0%, rgba(6, 182, 212, 0.15) 100%);
             border-radius: 10px;
             border: 1px solid rgba(59, 130, 246, 0.3);
         }
         
         .header-icon {
-            font-size: 36px;
-            margin-bottom: 10px;
+            font-size: 48px;
+            margin-bottom: 15px;
         }
         
         .header-text h1 {
-            margin: 0;
-            font-size: 28px;
-            font-weight: bold;
+            margin: 0 0 20px 0;
+            font-family: 'Oswald', sans-serif;
+            font-size: 36px;
+            font-weight: 600;
             color: #fff;
             line-height: 1.3;
+            text-align: center;
             background: linear-gradient(135deg, #3b82f6 0%, #06b6d4 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
         }
         
+        .metric-description {
+            text-align: left;
+            color: #d1d5db;
+            font-size: 14px;
+            line-height: 1.8;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 15px 20px;
+            background: rgba(30, 41, 59, 0.4);
+            border-radius: 8px;
+            border-left: 3px solid #3b82f6;
+        }
+        
+        .metric-description strong {
+            color: #60a5fa;
+            font-weight: 600;
+        }
+        
+        .metric-description p {
+            margin: 8px 0;
+        }
+        
         .header-text p {
             margin: 8px 0 0 0;
             color: #9ca3af;
-            font-size: 13px;
+            font-size: 15px;
             font-weight: 500;
         }
         
@@ -166,17 +192,17 @@ def create_player_attention_table(df, nfl_players, nfl_teams, df_detailed_result
         }
         
         th {
-            padding: 12px 8px;
+            padding: 18px 12px;
             text-align: center;
-            font-size: 11px;
+            font-size: 14px;
             font-weight: 600;
             text-transform: uppercase;
-            letter-spacing: 0.5px;
+            letter-spacing: 0.8px;
             color: #9ca3af;
         }
         
         td {
-            padding: 10px 8px;
+            padding: 16px 12px;
             border-bottom: 1px solid #2d3748;
             vertical-align: middle;
             text-align: center;
@@ -198,12 +224,12 @@ def create_player_attention_table(df, nfl_players, nfl_teams, df_detailed_result
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            width: 32px;
-            height: 32px;
-            border-radius: 6px;
+            width: 42px;
+            height: 42px;
+            border-radius: 8px;
             background: #374151;
             font-weight: bold;
-            font-size: 14px;
+            font-size: 18px;
             position: relative;
         }
         
@@ -224,22 +250,22 @@ def create_player_attention_table(df, nfl_players, nfl_teams, df_detailed_result
         
         .medal {
             position: absolute;
-            top: -6px;
-            right: -6px;
-            font-size: 14px;
+            top: -8px;
+            right: -8px;
+            font-size: 18px;
         }
         
         .player-cell {
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 8px;
+            gap: 12px;
             text-align: center;
         }
         
         .player-headshot {
-            width: 32px;
-            height: 32px;
+            width: 48px;
+            height: 48px;
             border-radius: 50%;
             object-fit: cover;
             border: 2px solid;
@@ -252,23 +278,23 @@ def create_player_attention_table(df, nfl_players, nfl_teams, df_detailed_result
             position: absolute;
             bottom: -2px;
             right: -2px;
-            width: 10px;
-            height: 10px;
+            width: 14px;
+            height: 14px;
             border-radius: 50%;
             border: 2px solid #1f2937;
         }
         
         .player-info h3 {
             margin: 0;
-            font-size: 11px;
+            font-size: 15px;
             font-weight: 600;
             color: #fff;
             white-space: nowrap;
         }
         
         .player-info p {
-            margin: 2px 0 0 0;
-            font-size: 9px;
+            margin: 4px 0 0 0;
+            font-size: 12px;
             color: #9ca3af;
             white-space: nowrap;
         }
@@ -277,48 +303,48 @@ def create_player_attention_table(df, nfl_players, nfl_teams, df_detailed_result
             display: inline-block;
             background: #374151;
             color: #e5e7eb;
-            padding: 2px 4px;
-            border-radius: 3px;
-            font-size: 8px;
+            padding: 3px 6px;
+            border-radius: 4px;
+            font-size: 11px;
             font-weight: 600;
-            margin-right: 3px;
+            margin-right: 4px;
         }
         
         .team-badge {
             display: inline-block;
             color: #fff;
-            padding: 2px 4px;
-            border-radius: 3px;
-            font-size: 8px;
+            padding: 3px 6px;
+            border-radius: 4px;
+            font-size: 11px;
             font-weight: 600;
         }
         
         .metric-label {
-            font-size: 8px;
+            font-size: 11px;
             color: #9ca3af;
             text-transform: uppercase;
-            letter-spacing: 0.2px;
-            margin-bottom: 2px;
+            letter-spacing: 0.3px;
+            margin-bottom: 4px;
         }
         
         .metric-value {
-            font-size: 12px;
+            font-size: 16px;
             font-weight: 700;
             color: #fff;
         }
         
         .attention-bar {
             width: 100%;
-            height: 4px;
+            height: 6px;
             background: #374151;
-            border-radius: 2px;
-            margin-top: 4px;
+            border-radius: 3px;
+            margin-top: 6px;
             overflow: hidden;
         }
         
         .attention-fill {
             height: 100%;
-            border-radius: 2px;
+            border-radius: 3px;
             transition: width 0.3s ease;
         }
         
@@ -436,8 +462,12 @@ def create_player_attention_table(df, nfl_players, nfl_teams, df_detailed_result
             <div class="table-header">
                 <div class="header-icon">🏈</div>
                 <div class="header-text">
-                    <h1>Neural Network Attention & Impact Analysis:<br>Top Defenders in 2023</h1>
-                    <p>{len(filtered_df)} players displayed | Sorted by {sort_option}</p>
+                    <h1>Neural Network Attention & Impact Analysis:<br>Top Defenders in Pass Coverage in 2023</h1>
+                    <div class="metric-description">
+                        <p><strong>Attention:</strong> Mean attention weight assigned to the defender across all post-throw frames. High value → defender had potential to make a play in critical moments</p>
+                        <p><strong>High Attention %:</strong> Percentage of post-throw frames where the defender was among the model's most influential defenders. High value → defender frequently involved in the play outcome</p>
+                        <p><strong>Removal Impact:</strong> Change in predicted completion probability when the defender is removed from the play. Measures most valuable defenders in coverage</p>
+                    </div>
                 </div>
             </div>
             
@@ -448,7 +478,7 @@ def create_player_attention_table(df, nfl_players, nfl_teams, df_detailed_result
                         <th style="width: 40%;">Player</th>
                         <th style="width: 13%;">High Attn %</th>
                         <th style="width: 13%;">Avg Attention</th>
-                        <th style="width: 29%;">REMOVAL<br><span style="font-size: 9px; text-transform: none; color: #6b7280;">Impact</span></th>
+                        <th style="width: 29%;">REMOVAL<br><span style="font-size: 11px; text-transform: none; color: #6b7280;">Impact</span></th>
                     </tr>
                 </thead>
                 <tbody>
@@ -490,7 +520,7 @@ def create_player_attention_table(df, nfl_players, nfl_teams, df_detailed_result
                 headshot_html = f'<img src="{headshot}" alt="{player_name}" class="player-headshot" style="border-color: {team_color};" onerror="this.style.display=\'none\';">'
             else:
                 initials = ''.join([w[0].upper() for w in player_name.split() if w])[:2] or '??'
-                headshot_html = f'<div class="player-headshot" style="border-color: {team_color}; background: linear-gradient(135deg, {team_color}, {team_color2}); display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 12px; color: #fff;">{initials}</div>'
+                headshot_html = f'<div class="player-headshot" style="border-color: {team_color}; background: linear-gradient(135deg, {team_color}, {team_color2}); display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 16px; color: #fff;">{initials}</div>'
 
             html_content += f"""
                 <tr>
@@ -510,7 +540,7 @@ def create_player_attention_table(df, nfl_players, nfl_teams, df_detailed_result
                                 <p>
                                     <span class="position-badge">{position}</span>
                                     <span class="team-badge" style="background-color: {team_color};">{team}</span>
-                                    <span style="color: #6b7280; font-size: 8px;">{play_count} plays</span>
+                                    <span style="color: #6b7280; font-size: 11px;">{play_count} plays</span>
                                 </p>
                             </div>
                         </div>
